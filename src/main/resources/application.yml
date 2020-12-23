@@ -1,0 +1,15 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: 76c4d424f0e61661d02a
+            client-secret: dab2fc466b024556af8090c7b8f0d34ca3961ee4
+#        scope: read:user,user:email
+#security.oauth2.client.scope=read:user,user:email
+#security.oauth2.resource.user-info-uri=https://api.github.com/user
+
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
