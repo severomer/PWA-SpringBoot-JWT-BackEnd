@@ -63,28 +63,29 @@
                 <br><br>
                 <ul  th:if="${not #lists.isEmpty(eventmembers)}">
                 <li  th:each="tempEser : ${eventmembers}" th:text="${tempEser.getUser().getUserName()} + ' ' + ${tempEser.isAttended()}">
-                <input 
+ <!--                <input 
       type="checkbox" 
       name="myBooleanVariable" 
       th:checked="${myBooleanVariable}"/>
-                </li>
+     -->            </li>
                 </ul>
 
                 
         </td>
         
         <td>
-        <th:block th:each="tempEser : ${eventmembers}" >
+        <th:block th:each="tempEser, stat : ${eventmembers}" >
 
       
                       	 
-	 	<form action="#" th:action="@{/events/updattend}"
-						 th:object="${tempUser}" method="POST">
+	 	<form action="#" th:action="@{/events/updattend}"  th:object="${tempEventMembers}" method="POST">
+					<!--  th:object="${tempUser}"  -->	
+						
 			<input 
       type="checkbox" 
       name="myBooleanVariable" 
       id="myBooleanVariable" 
-      th:field="*{attended}"
+      th:field="*{eventMemberList[__${stat.index}__].attended}"
       th:text="${tempEser.getUser().getUserName()} + ' ' + ${tempEser.isAttended()}"
       th:checked="${tempEser.isAttended()}"/>
       	

@@ -7,11 +7,11 @@ import javax.persistence.AssociationOverrides;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.persistence.JoinColumn;
 
 @Entity
 @Table(name = "EVENT_USER")
@@ -22,6 +22,7 @@ import javax.persistence.JoinColumn;
         joinColumns = @JoinColumn(name = "EVENT_ID")) })
 public class EventUser {
 
+//	@JsonManagedReference
 	private EventUserId primaryKey = new EventUserId();
 	
 	private boolean  attended;
@@ -55,8 +56,16 @@ public class EventUser {
 		    public void setEvent(Event event) {
 		        getPrimaryKey().setEvent(event);
 		    }
-
+		    
+		    
+			 @Transient
 	public boolean isAttended() {
+		return attended;
+	}
+	
+	
+
+	public boolean getAttended() {
 		return attended;
 	}
 

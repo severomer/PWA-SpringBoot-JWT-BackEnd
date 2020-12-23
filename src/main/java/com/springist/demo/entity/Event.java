@@ -20,6 +20,8 @@ import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "event")
 public class Event {
@@ -51,12 +53,14 @@ public class Event {
 	
     @OneToMany(mappedBy = "primaryKey.event",
             cascade = CascadeType.ALL)	
+	@JsonBackReference
 	private Set<EventUser> eventUsers = new HashSet<EventUser>();
 
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "event_members", 
 	joinColumns = @JoinColumn(name = "event_id"), 
 	inverseJoinColumns = @JoinColumn(name = "user_id"))
+
 	private Collection<User> members;
 	
 	

@@ -38,6 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.springist.demo.entity.Event;
 import com.springist.demo.entity.EventUser;
+import com.springist.demo.entity.EventUserList;
 import com.springist.demo.entity.Greeting;
 import com.springist.demo.service.EventService;
 import com.springist.demo.service.EventUserService;
@@ -293,7 +294,7 @@ public class EventController {
 			EventUser eventUser = new EventUser();
 			eventUser.setEvent(theEvent);
 			eventUser.setUser(e);
-			eventUser.setAttended(true);
+			eventUser.setAttended(false);
 			eventUser.setMemberDate(new Date());
 
 			theEvent.addEventUser(eventUser);
@@ -351,7 +352,8 @@ public class EventController {
 
 		@GetMapping("/events/attend")
 		public ModelAndView attendEvent(@RequestParam("eventId") int theId, @RequestParam("userId") int userId,
-				@ModelAttribute("event") Event theEvent, @ModelAttribute(value="tempUser") EventUser eventUser) {
+				@ModelAttribute("event") Event theEvent, @ModelAttribute(value="tempUser") EventUser eventUser, 
+				@ModelAttribute(value="tempEventMembers") EventUserList eventusers) {
 			
 			ModelAndView modelAndView = new ModelAndView("eventat");
 
@@ -360,12 +362,16 @@ public class EventController {
 			User e = userService.findByUserId((long) userId) ;
 			System.out.println("attend ici"+e);
 
-List<EventUser> eventmembers = eventUserService.findByPrimaryKey(theEvent);
+ eventusers.setEventMemberList(eventUserService.findByPrimaryKey(theEvent));
+ 
+
+ List<EventUser> eventmembers = eventUserService.findByPrimaryKey(theEvent);
+ 
 System.out.println("attend ici"+eventmembers);
 
 boolean myBooleanVariable = false;
 
-myBooleanVariable = eventmembers.get(0).isAttended();
+// myBooleanVariable = eventmembers.get(0).isAttended();
 modelAndView.addObject("myBooleanVariable", myBooleanVariable);
 
 modelAndView.addObject("event", theEvent);

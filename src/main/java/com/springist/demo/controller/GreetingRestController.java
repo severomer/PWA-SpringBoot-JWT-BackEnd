@@ -1,18 +1,19 @@
 package com.springist.demo.controller;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,10 +21,16 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.springist.demo.entity.Event;
+import com.springist.demo.entity.EventUser;
 import com.springist.demo.entity.Greeting;
+import com.springist.demo.entity.User;
 import com.springist.demo.service.EventService;
+import com.springist.demo.service.EventUserService;
 import com.springist.demo.service.GreetingService;
+import com.springist.demo.service.UserService;
+import com.springist.demo.user.CrmUser;
 
+@CrossOrigin(origins = "http://localhost:8100")
 @RestController
 @RequestMapping("/api")
 public class GreetingRestController {
@@ -34,14 +41,42 @@ public class GreetingRestController {
 	private GreetingService greetingService;
 	
 	private EventService eventService;
-	
+    
+    private EventUserService eventUserService;
+    
+    @Autowired
+    private UserService userService;
+
 	
 	@Autowired
-	public GreetingRestController(GreetingService theGreetingService, EventService eventService) {
+	public GreetingRestController(GreetingService theGreetingService, EventService eventService, EventUserService eventUserService) {
 		greetingService = theGreetingService;
 		this.eventService = eventService;
+		this.eventUserService=eventUserService;
 	}
 	
+	@PostMapping("/register")
+	ResponseEntity<CrmUser> createUser(@RequestBody CrmUser theCrmUser)
+	{
+		
+		String userName = theCrmUser.getUserName();
+		System.out.println("Processing registration form for: " + userName);
+		
+
+		// check the database if user already exists
+        User existing = userService.findByUserName(userName);
+        if (existing != null){
+			System.out.println("User name already exists.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(theCrmUser);
+        }
+        
+        // create user account        						
+        userService.save(theCrmUser);
+        
+        System.out.println("Successfully created user: " + userName);
+		return ResponseEntity.status(HttpStatus.CREATED).body(theCrmUser);
+	}
+
 	
 	@GetMapping("/greetings")
 	public MappingJacksonValue listAll(){
@@ -56,14 +91,20 @@ public class GreetingRestController {
                         .filterOutAllExcept("message","post_date","user.userName"));  //nested filter not suppoerted userName notworking
     mappingJacksonValue.setFilters(filters);
     return mappingJacksonValue;
-		
-		
+
 		
 //		return greetingService.findAll();
 		
 	}
 	
 	
+	@PostMapping("/greetings")
+	public String PostGreeting()
+	{
+		return "post greeting";
+	}
+
+
 	@GetMapping("/greetings/{userName}")
 	
 	public MappingJacksonValue listUser(@PathVariable String userName){
@@ -103,7 +144,22 @@ public class GreetingRestController {
 		return events;
 	}
 	
+	@PostMapping("/euser/{eventId}/{userId}/{attend}")
+	public EventUser setEventUser(@PathVariable int userId, @PathVariable int eventId, @PathVariable boolean attend) {
+		
+		// @RequestBody EventUser euser
+		EventUser tempEventUser = eventUserService.findByIds((long)eventId, (long)userId);
+
+		System.out.println("REST API tempEventUser : " + tempEventUser);
+		
+		tempEventUser.setAttended(attend);
+		
+		eventUserService.save(tempEventUser);
+		return tempEventUser;
+
+	}
 	
+
 	
 	@GetMapping("/events")
 	public Page<Event> listFirstEvents() {
